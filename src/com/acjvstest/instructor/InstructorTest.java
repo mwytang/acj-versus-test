@@ -1,4 +1,4 @@
-package com.acj.vs.test.instructor;
+package com.acjvstest.instructor;
 import static org.junit.Assert.*;
 
 import org.junit.After;
