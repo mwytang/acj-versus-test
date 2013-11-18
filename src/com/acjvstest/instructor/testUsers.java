@@ -1,5 +1,7 @@
 package com.acjvstest.instructor;
 
+import static org.junit.Assert.*;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -100,6 +102,19 @@ static private WebDriver driver;
 		//find Confirm button and click
 		WebElement confirmButton = driver.findElement(By.xpath("//*[@id='main']/div/div/form/div[9]/div/input"));
 		confirmButton.click(); 
+		
+		// waits for redirect to finish; will wait 10 seconds before throwing exception
+ 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(WebDriver d) {
+            	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/");
+            }
+   
+        });
+ 		
+ 		//find the "User created successfully" text
+ 		WebElement successfullText = driver.findElement(By.xpath(" //*[@id='flash-messages']/li"));
+ 		assertEquals(successfullText.getText(),"User created successfully");
+        
 		
 	}
 	
