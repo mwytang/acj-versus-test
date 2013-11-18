@@ -1,5 +1,7 @@
 package com.acjvstest.instructor;
 
+import static org.junit.Assert.*;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -82,7 +84,18 @@ static private WebDriver driver;
 		emailBox.sendKeys("shk@gmail.com");
 		//find submit button and click
 		WebElement submitButton = driver.findElement(By.xpath("//*[@id='main']/div/div/a[2]"));
-		submitButton.click(); 	
+		submitButton.click(); 
+		
+		// waits for redirect to finish; will wait 10 seconds before throwing exception
+		 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		            public Boolean apply(WebDriver d) {
+		            	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/userprofile/0");
+		            }
+		        });
+		 		
+		// check if the the update has been successful 
+		WebElement successfulMsg = driver.findElement(By.xpath("//*[@id='flash-messages']/li"));
+		assertEquals(successfulMsg.getText(), "The profile has been successfully updated.");
 	}
 
 }
