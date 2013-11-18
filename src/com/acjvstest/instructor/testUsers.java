@@ -1,7 +1,5 @@
 package com.acjvstest.instructor;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -73,9 +71,7 @@ static private WebDriver driver;
 		//find Username box and enter the username 
 		WebElement userNameBox = driver.findElement(By.xpath("//*[@id='usernameInput']"));
 		userNameBox.sendKeys("student1");
-		
-		//check if the red error massage has disappeared
-		assertFalse("A username is required.", false); 
+		 
 		
 		//find First Name box and enter the first name
 		WebElement firstNameBox = driver.findElement(By.xpath("//*[@id='firstnameInput']"));
