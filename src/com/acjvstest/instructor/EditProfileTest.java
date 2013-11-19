@@ -79,12 +79,27 @@ static private WebDriver driver;
 		WebElement edit = driver.findElement(By.xpath("//*[@id='main']/div/div/a[1]"));
 		edit.click();
 		
+		//adding wrong email addresss
 		//add email address
 		WebElement emailBox = driver.findElement(By.xpath("//*[@id='main']/div/div/form/div[4]/div/input"));
-		emailBox.sendKeys("shk@gmail.com");
+		emailBox.sendKeys("shk");
+		
 		//find submit button and click
 		WebElement submitButton = driver.findElement(By.xpath("//*[@id='main']/div/div/a[2]"));
-		submitButton.click(); 
+		submitButton.click();
+		
+		//check if the error message is displayed
+		WebElement errorMsg = driver.findElement(By.xpath("//*[@id='main']/div/div/form/div[4]/span"));
+		System.out.println(errorMsg.getText());
+		assertEquals(errorMsg.getText(),"Incorrect email format");
+		
+		
+		//add email address
+		emailBox.clear(); 
+		emailBox.sendKeys("shk@gmail.com");
+		//find submit button and click
+		WebElement submitButton2 = driver.findElement(By.xpath("//*[@id='main']/div/div/a[2]"));
+		submitButton2.click(); 
 		
 		// waits for redirect to finish; will wait 10 seconds before throwing exception
 		 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
