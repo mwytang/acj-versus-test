@@ -1,4 +1,4 @@
-package com.acjvstest.instructor;
+package com.acjvstest.selenium;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

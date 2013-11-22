@@ -1,4 +1,4 @@
-package com.acjvstest.instructor;
+package com.acjvstest.selenium;
 
 import static org.junit.Assert.*;
 
@@ -7,7 +7,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -15,9 +17,12 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.acjvstest.driver.Course;
+
 public class CoursesTest {
 	
 	static private WebDriver driver;
+	static private Course course;
 	
 	private static final String inputUserXPath = "//*[@id='inputUser']";
 
@@ -57,44 +62,35 @@ public class CoursesTest {
 	}
 	
 	/**
-	 * tests creating a course as a prof. 
+	 * tests successfully creating a course as an administrator. 
 	 */
 	@Test 
 	public void testCreateCourse(){
-		//find Create Course button
-		WebElement createCourse = driver.findElement(By.xpath("//*[@id='step1']"));
-		//click on create course 
-		createCourse.click(); 
-		
-		//enter EECE416 course 
-		WebElement box = driver.findElement(By.xpath("//*[@id='courseName']"));
-		//type EECE416
-		box.sendKeys("EECE416");
-		// find create button 
-		WebElement create = driver.findElement(By.xpath("//*[@id='main']/div/form/input"));
-		create.click(); 
-		
-		// click on the course
-		List<WebElement> course = driver.findElements(By.xpath("//*[@id='step2']/b"));
-		course.get(0).click();
-	
-		
-		// waits for redirect to finish; will wait 10 seconds before throwing exception
- 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-            	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/questionpage/5");
-            }
-        });
-			
+		course.addCourse(driver, "EECE416");
+		// check that the course is now added and is the FOURTH course on the list
+		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
+		assertEquals(courses.get(3).getText(), "EECE416");	
 	}
 	
+	/**
+	 * tests clicking Create Course without a name. Expects nothing to happen
+	 */
+	@Test
+	public void testCreateEmptyCourse() {
+		// refresh the page
+		driver.get("http://localhost:8080/static/index.html#/");
+		course.addCourse(driver, "");
+		// count number of courses: should still be six
+		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
+		assertEquals(courses.size(), 6);	
+	}
 
 	/**
 	 * tests editing a course -> adding and deleting tag 
 	 */
 	@Test 
 	public void testEditCourse(){
-		//go to home page
+		// refresh the page
 		driver.get("http://localhost:8080");
 		//find Edit Course button and click
 		WebElement editCourse = driver.findElement(By.xpath("//*[@id='main']/div/table/tbody/tr[1]/td[5]/a"));

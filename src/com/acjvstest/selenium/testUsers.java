@@ -1,4 +1,4 @@
-package com.acjvstest.instructor;
+package com.acjvstest.selenium;
 
 import static org.junit.Assert.*;
 
