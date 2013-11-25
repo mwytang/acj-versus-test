@@ -20,16 +20,20 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.acjvstest.driver.Login;
 
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AddQuestionTest {
+public class AddQuestionTest  {
 
 	static private WebDriver driver;
 	static private Login login = new Login();
 	
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		login.logout(driver);
-		driver.quit();		
+		/*login.logout(driver);
+		driver.quit();*/		
 	}
 
 	@Before
@@ -42,31 +46,47 @@ public class AddQuestionTest {
 
 	@BeforeClass
 	public static void init() {
-		driver = new FirefoxDriver();
+		/*driver = new FirefoxDriver();
 		driver.get("http://localhost:8080");
-		login.login(driver, "admin", "password");
+		login.login(driver, "admin", "password");*/
 	}
 	
 	/**
 	 * test we are on the homepage
 	 */
 	@Test
-	public void testStepA() {
+	@Given("^instructor is on the Homepage and he has created a course$")
+	public void instructor_is_on_the_Homepage_and_he_has_created_a_course() throws Throwable {
+		driver = new FirefoxDriver();
 		driver.get("http://localhost:8080");
-		assertEquals("http://localhost:8080/static/index.html#/", driver.getCurrentUrl());
+		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		    public Boolean apply(WebDriver d) {
+		    	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/login");
+		    }
+		});
+		login.login(driver, "admin", "password");
+		driver.get("http://localhost:8080");
 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
 		    public Boolean apply(WebDriver d) {
 		    	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/");
 		    }
 		});
+		assertEquals("http://localhost:8080/static/index.html#/", driver.getCurrentUrl());
 	}
 	
 	/**
 	 * test clicking on the preferred course's name
 	 */
 	@Test
-	public void testStepB() {
-		driver.findElement(By.xpath("//*[@id='step2']")).click();
+	@When("^instructor clicks on course name$")
+	public void instructor_clicks_on_course_name() throws Throwable {
+		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		    public Boolean apply(WebDriver d) {
+		    	List<WebElement> courses = d.findElements(By.xpath("//*[@id='step2']"));
+		    	return (courses.size() > 0);
+		    }
+		});
+		driver.findElement(By.xpath("//*[@id='main']/div/table/tbody/tr[1]/td[2]")).click();
 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
 		    public Boolean apply(WebDriver d) {
 		    	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/questionpage/1");
@@ -78,7 +98,8 @@ public class AddQuestionTest {
 	 * test we are on the course/question page
 	 */
 	@Test
-	public void testStepC() {
+	@Then("^the Course Page opens$")
+	public void the_Course_Page_opens() throws Throwable {
 		// check we are on the course/question page
 		assertEquals("http://localhost:8080/static/index.html#/questionpage/1", driver.getCurrentUrl());
 		WebElement ques = driver.findElement(By.xpath("//*[@id='main']/div/div/h2"));
@@ -89,7 +110,8 @@ public class AddQuestionTest {
 	 * click on the "Create Question" button
 	 */
 	@Test
-	public void testStepD() {
+	@When("^instructor clicks on the Create Question button$")
+	public void instructor_clicks_on_the_Create_Question_button() throws Throwable {
 		driver.findElement(By.xpath("//*[@id='stepNav']")).click();
 	}
 	
@@ -97,7 +119,8 @@ public class AddQuestionTest {
 	 * test the text fields are available
 	 */
 	@Test
-	public void testStepE() {
+	@Then("^the edit text boxes for creating a question is shown$")
+	public void the_edit_text_boxes_for_creating_a_question_is_shown() throws Throwable {
 		List<WebElement> text = driver.findElements(By.xpath("//*[@id='myquestion']"));
 		assertTrue(text.size() > 0);
 	}
@@ -106,7 +129,8 @@ public class AddQuestionTest {
 	 * fill in the form and click submit
 	 */
 	@Test
-	public void testStepF() {
+	@When("^instructor fills in the question form and clicks on the submit button$")
+	public void instructor_fills_in_the_question_form_and_clicks_on_the_submit_button() throws Throwable {
 		// fill in the title
 		driver.findElement(By.xpath("//*[@id='questionTitle']")).sendKeys("title");
 		// fill in the question
@@ -121,12 +145,15 @@ public class AddQuestionTest {
 	 * check the question creation is successful
 	 */
 	@Test
-	public void testStepG() {
+	@Then("^question is created$")
+	public void question_is_created() throws Throwable {
 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
 		    public Boolean apply(WebDriver d) {
 		    	return (d.findElements(By.xpath("//*[@id='flash-messages']/li")).size() > 0);
 		    }
 		});
 		assertEquals("The question has been successfully added.", driver.findElement(By.xpath("//*[@id='flash-messages']/li")).getText());
+		login.logout(driver);
+		driver.quit();	
 	}
 }

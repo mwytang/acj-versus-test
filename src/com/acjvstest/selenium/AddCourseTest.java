@@ -18,6 +18,10 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.acjvstest.driver.Login;
 
+import cucumber.api.java.en.When;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.Given;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AddCourseTest {
 	
@@ -27,8 +31,8 @@ public class AddCourseTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		login.logout(driver);
-		driver.quit();	// exits Firefox Browser
+		//login.logout(driver);
+		//driver.quit();	// exits Firefox Browser
 	}
 
 	@Before
@@ -41,16 +45,20 @@ public class AddCourseTest {
 
 	@BeforeClass
 	public static void init() {
-		driver = new FirefoxDriver();	// creates Firefox Browser
+		/*driver = new FirefoxDriver();	// creates Firefox Browser
         driver.get("http://localhost:8080");	// goes to acj application
-		login.login(driver, "admin", "password");
+		login.login(driver, "admin", "password");*/
 	}
 	
 	/**
 	 * go to homepage
 	 */
 	@Test
-	public void testStepA() {
+	@Given("^instructor is on Home page$")
+	public void instructor_is_on_Home_page() throws Throwable {
+		driver = new FirefoxDriver();	// creates Firefox Browser
+        driver.get("http://localhost:8080");	// goes to acj application
+		login.login(driver, "admin", "password");
 		driver.get("http://localhost:8080/static/index.html#/");
 		assertEquals(driver.getCurrentUrl(), "http://localhost:8080/static/index.html#/");
 	}
@@ -59,7 +67,8 @@ public class AddCourseTest {
 	 * click on create course
 	 */
 	@Test
-	public void testStepB() {
+	@When("^instructor clicks on the Create Course button$")
+	public void instructor_clicks_on_the_Create_Course_button() throws Throwable {
 		driver.findElement(By.xpath("//*[@id='step1']")).click(); 
 		numCourses = driver.findElements(By.xpath("//*[@id='step2']/b")).size();
 	}
@@ -68,15 +77,16 @@ public class AddCourseTest {
 	 * find course name form field
 	 */
 	@Test
-	public void testStepC() {
+	@Then("^course name text box is shown$")
+	public void course_name_text_box_is_shown() throws Throwable {
 		driver.findElement(By.xpath("//*[@id='courseName']")).click();
 	}
 	
 	/**
 	 * fill in name field and click "Create"
 	 */
-	@Test
-	public void testStepD() {
+	@When("^instructor types the name of the course and click on Create button$")
+	public void instructor_types_the_name_of_the_course_and_click_on_Create_button() throws Throwable {
 		driver.findElement(By.xpath("//*[@id='courseName']")).sendKeys("CPSC 304");
 		// click create
 		driver.findElement(By.xpath("//*[@id='main']/div/form/input")).click();
@@ -86,10 +96,13 @@ public class AddCourseTest {
 	 * tests successfully creating a course as an administrator. 
 	 */
 	@Test 
-	public void testStepE(){
+	@Then("^the course is created$")
+	public void the_course_is_created() throws Throwable {
 		// check that the course is added
 		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
 		assertEquals((numCourses + 1), courses.size());	
+		login.logout(driver);
+		driver.quit();	// exits Firefox Browser
 	}
 
 }

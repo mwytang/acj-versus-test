@@ -1,9 +1,0 @@
-Scenario: Instructor posts a question 
-
-Given instructor is on the Home page and he has created a course 
-When instructor clicks on course name
-Then the course page opens
-When instructor clicks on the Create Question button 
-Then the edit text boxes for creating a question is shown 
-When instructor fills in the question form and clicks on the submit button
-Then question is created
