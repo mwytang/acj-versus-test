@@ -29,10 +29,19 @@ public class Login {
 		// click logout
 		driver.findElement(By.xpath("/html/body/div[2]/nav/ul[2]/li[1]/ul/li[2]/a")).click();
 		// waits for redirect to login page
-        (new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-            	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/login");
-            }
-        });
+		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		    public Boolean apply(WebDriver d) {
+		    	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/login");
+		    }
+		});
+	}
+	
+	public void invalidLogin(WebDriver driver, String username, String password) {
+		// enter username
+		driver.findElement(By.xpath("//*[@id='inputUser']")).sendKeys(username);
+		// enter password
+		driver.findElement(By.xpath("//*[@id='inputPass']")).sendKeys(password);
+		// sign in
+		driver.findElement(By.xpath("//*[@id='main']/div/div/form/div[3]/input")).click();
 	}
 }

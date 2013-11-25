@@ -6,7 +6,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,10 +16,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.acjvstest.driver.Login;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LoginTest {
 	
 	static private WebDriver driver;
-	static private Login signin;
+	static private Login signin = new Login();
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
@@ -43,6 +46,7 @@ public class LoginTest {
 	 */
 	@Test
 	public void testRegularLogin() {
+		driver.get("http://localhost:8080");
 		signin.login(driver, "admin", "password");
         // asserts the application redirects to the correct page
 		WebElement title = driver.findElement(By.xpath("//*[@id='main']/div/h2/span[2]"));
@@ -65,8 +69,9 @@ public class LoginTest {
 	 */
 	@Test
 	public void testInvalidUser() {
-		signin.login(driver, "invalid", "invalid");
-		//TODO: check error message appears
+		signin.invalidLogin(driver, "invalid", "invalid");
+		WebElement error = driver.findElement(By.xpath("//*[@id='flash-messages']/li"));
+		assertEquals(error.getText(), "Incorrect username or password");
 	}
 
 }

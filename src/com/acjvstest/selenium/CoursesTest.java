@@ -2,32 +2,35 @@ package com.acjvstest.selenium;
 
 import static org.junit.Assert.*;
 
+import org.junit.runners.MethodSorters;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.acjvstest.driver.Course;
+import com.acjvstest.driver.Login;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CoursesTest {
 	
 	static private WebDriver driver;
-	static private Course course;
-	
-	private static final String inputUserXPath = "//*[@id='inputUser']";
+	static private Course course = new Course();
+	static private Login login = new Login();
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		login.logout(driver);
 		driver.quit();	// exits Firefox Browser
 	}
 
@@ -44,32 +47,7 @@ public class CoursesTest {
 	public static void init() {
 		driver = new FirefoxDriver();	// creates Firefox Browser
         driver.get("http://localhost:8080");	// goes to acj application
-     
-     		WebElement username = driver.findElement(By.xpath(inputUserXPath));
-     		username.sendKeys("root");
-     		// enter password
-     		WebElement password = driver.findElement(By.xpath("//*[@id='inputPass']"));
-     		password.sendKeys("password");
-     		// sign in
-     		WebElement signin = driver.findElement(By.xpath("//*[@id='main']/div/div/form/div[3]/input"));
-     		signin.click();
-     	    // waits for redirect to finish; will wait 10 seconds before throwing exception
-     		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-                public Boolean apply(WebDriver d) {
-                	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/");
-                }
-            });
-	}
-	
-	/**
-	 * tests successfully creating a course as an administrator. 
-	 */
-	@Test 
-	public void testCreateCourse(){
-		course.addCourse(driver, "EECE416");
-		// check that the course is now added and is the FOURTH course on the list
-		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
-		assertEquals(courses.get(3).getText(), "EECE416");	
+		login.login(driver, "admin", "password");
 	}
 	
 	/**
@@ -77,89 +55,51 @@ public class CoursesTest {
 	 */
 	@Test
 	public void testCreateEmptyCourse() {
+		driver.get("http://localhost:8080/static/index.html#/");
 		// refresh the page
+		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
+		int size = courses.size();
 		driver.get("http://localhost:8080/static/index.html#/");
 		course.addCourse(driver, "");
 		// count number of courses: should still be six
-		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
-		assertEquals(courses.size(), 6);	
+		courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
+		assertEquals(size, courses.size());	
 	}
 
 	/**
-	 * tests editing a course -> adding and deleting tag 
+	 * tests editing a course
 	 */
 	@Test 
 	public void testEditCourse(){
 		// refresh the page
-		driver.get("http://localhost:8080");
-		//find Edit Course button and click
-		WebElement editCourse = driver.findElement(By.xpath("//*[@id='main']/div/table/tbody/tr[1]/td[5]/a"));
-		editCourse.click();
-		// waits for redirect to finish; will wait 10 seconds before throwing exception
-	 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-	            public Boolean apply(WebDriver d) {
-	            	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/editcourse/5");
-	            }
-	        });
-	 		
-	 		
-	 	//Find the add tag box 
-	 	WebElement box = driver.findElement(By.xpath("//*[@id='main']/div/div/form/input"));
-	 	// type "tag1"
-	 	box.sendKeys("tag1");
-	 	// find Add Tag button and click
-	 	WebElement addTagButton = driver.findElement(By.xpath("//*[@id='main']/div/div/form/button"));
-	 	addTagButton.click();
-	 	
-	 	
+		driver.get("http://localhost:8080/static/index.html#/");
+		// edit course
+		course.editCourse(driver, 1);
+		WebElement success = driver.findElement(By.xpath("//*[@id='flash-messages']/li"));
+		assertEquals(success.getText(), "The course has been successfully modified.");
+		WebElement name = driver.findElement(By.xpath("//*[@id='main']/div/div/form/span[1]"));
+		assertEquals(name.getText(), "APSC 150 101");
+	}
+	
+	/**
+	 * tests adding and deleting a tag
+	 */
+	@Test
+	public void testTags() {
+		driver.get("http://localhost:8080/static/index.html#/editcourse/1");
+		course.addTag(driver, "tag1");
 	 	WebElement tag = driver.findElement(By.xpath("//*[@id='main']/div/div/form/table/tbody/tr/td[2]"));
 	 	assertEquals(tag.getText(), "tag1");
+	 	course.deleteTag(driver, 1);
+	 	try {
+	 		// the element should not be found because it is deleted.
+	 		driver.findElement(By.xpath("//*[@id='main']/div/div/form/table/tbody/tr/td[2]"));
+	 		fail("the tag should not exist");
+	 	} catch (NoSuchElementException e) {
+	 		// do nothing
+	 	}
+	}
 	 	
-	 	//find the delete button
-	 	WebElement delete = driver.findElement(By.xpath("//*[@id='main']/div/div/form/table/tbody/tr/td[1]/button/span"));
-	 	//click on delete button 
-	 	delete.click();
-	 	
-	}
-	
-	/**
-	 * tests View Statistics 
-	 */
-	@Test 
-	public void testViewStatistics(){
-		//go to home page
-		driver.get("http://localhost:8080");
-		//find View Statistics button and click
-		WebElement viewStat = driver.findElement(By.xpath("//*[@id='main']/div/table/tbody/tr[1]/td[6]/a"));
-		viewStat.click();
-		// waits for redirect to finish; will wait 10 seconds before throwing exception
-		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-			public Boolean apply(WebDriver d) {
-				return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/stats/5");
-			}
-		});
-			
-	}
-	
-	/**
-	 * tests viewing question(s)  
-	 */
-	@Test 
-	public void testViewQuestions(){
-		//go to home page
-		driver.get("http://localhost:8080");
-		//find question(s) button for EECE416 course and click
-		WebElement viewQuestion = driver.findElement(By.xpath("//*[@id='main']/div/table/tbody/tr[1]/td[2]/span"));
-		viewQuestion.click();
-		// waits for redirect to finish; will wait 10 seconds before throwing exception
-		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-			public Boolean apply(WebDriver d) {
-				return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/questionpage/5");
-			}
-		});
-			
-	}
-	
 	/**
 	 * tests searching a course  
 	 */
@@ -167,26 +107,10 @@ public class CoursesTest {
 	public void testSearchCourse(){
 		//go to home page
 		driver.get("http://localhost:8080");
-		//find the search course box 
-		WebElement searchBox = driver.findElement(By.xpath("//*[@id='main']/div/div[2]/form/div/input"));
-		//type EECE416
-		searchBox.sendKeys("EECE416");
+		course.searchCourse(driver, "STAT 200");
 		//checks if the course visible on the page is EECE416
-		WebElement courses = driver.findElement(By.xpath("//*[@id='step2']/b"));
-		assertEquals(courses.getText(),"EECE416");
+		List<WebElement> courses = driver.findElements(By.xpath("//*[@id='step2']/b"));
+		assertEquals(courses.size(), 1);	
 	}
-	
-	/**
-	 * Prints out all the courses 
-	 */
-	@Test 
-	public void testAllCourse(){
-		   List<WebElement> test = driver.findElements(By.xpath("//*[@id='step2']/b"));
-		   for (int i = 0; i < test.size(); i++) {
-	              System.out.println("course: " + test.get(i).getText()); // println prints it onto the console
-	        }
-	}
-	
-
 }
 
