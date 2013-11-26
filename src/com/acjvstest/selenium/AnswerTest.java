@@ -52,7 +52,7 @@ public class AnswerTest {
 	 * test editing a question
 	 */
 	@Test
-	public void testEditQuestion() {
+	public void testEditAnswer() {
 		// go to the answer page
 		driver.get("http://localhost:8080/static/index.html#/answerpage/251");
 		// click edit for the first question
@@ -78,7 +78,7 @@ public class AnswerTest {
 	 * test deleting a question
 	 */
 	@Test
-	public void testRemoveQuestion() {
+	public void testRemoveAnswer() {
 		// go to the answer page
 		driver.get("http://localhost:8080/static/index.html#/answerpage/251");
 		// press delete for the first answer

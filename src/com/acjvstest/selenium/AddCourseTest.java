@@ -15,6 +15,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.acjvstest.driver.Login;
 
@@ -58,6 +60,11 @@ public class AddCourseTest {
 	public void instructor_is_on_Home_page() throws Throwable {
 		driver = new FirefoxDriver();	// creates Firefox Browser
         driver.get("http://localhost:8080");	// goes to acj application
+		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		    public Boolean apply(WebDriver d) {
+		    	return d.getCurrentUrl().equalsIgnoreCase("http://localhost:8080/static/index.html#/login");
+		    }
+		});
 		login.login(driver, "admin", "password");
 		driver.get("http://localhost:8080/static/index.html#/");
 		assertEquals(driver.getCurrentUrl(), "http://localhost:8080/static/index.html#/");
